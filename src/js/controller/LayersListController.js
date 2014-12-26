@@ -12,6 +12,8 @@
     this.toggleLayerPreviewEl = document.querySelector('.layers-toggle-preview');
 
     this.rootEl.addEventListener('click', this.onClick_.bind(this));
+    this.lastLayerClicked = null;
+    this.lastLayerClickedAt = 0;
     this.toggleLayerPreviewEl.addEventListener('click', this.toggleLayerPreview_.bind(this));
 
     $.subscribe(Events.PISKEL_RESET, this.renderLayerList_.bind(this));
@@ -86,9 +88,21 @@
     var index;
     if (el.classList.contains('button')) {
       this.onButtonClick_(el);
+      this.lastLayerClicked = null;
     } else if (el.classList.contains('layer-item')) {
       index = el.dataset.layerIndex;
       this.piskelController.setCurrentLayerIndex(parseInt(index, 10));
+      if (this.lastLayerClicked == index) {
+        var dblClickDelayMs = 1500;
+        var dblClicked = (Date.now() - this.lastLayerClickedAt) < dblClickDelayMs;
+        if (dblClicked) {
+          this.renameCurrentLayer_();
+        }
+      }
+      this.lastLayerClicked = index;
+      this.lastLayerClickedAt = Date.now();
+    } else {
+      this.lastLayerClicked = null;
     }
   };
 
